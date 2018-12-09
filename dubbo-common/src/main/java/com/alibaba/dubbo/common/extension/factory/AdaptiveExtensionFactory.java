@@ -26,10 +26,15 @@ import java.util.List;
 
 /**
  * AdaptiveExtensionFactory
+ *
+ * <p> 扩展点工厂 适配器
+ * @see com.alibaba.dubbo.config.spring.extension.SpringExtensionFactory Spring IOC容器 扩展点工厂.
+ * @see SpiExtensionFactory
  */
 @Adaptive
 public class AdaptiveExtensionFactory implements ExtensionFactory {
 
+    /** 扩展点工厂集合 */
     private final List<ExtensionFactory> factories;
 
     public AdaptiveExtensionFactory() {
@@ -43,6 +48,7 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
 
     @Override
     public <T> T getExtension(Class<T> type, String name) {
+        // 遍历所有 扩展点工厂获得扩展点, 获得就直接返回.
         for (ExtensionFactory factory : factories) {
             T extension = factory.getExtension(type, name);
             if (extension != null) {

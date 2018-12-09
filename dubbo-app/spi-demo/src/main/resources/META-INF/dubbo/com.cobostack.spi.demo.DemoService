@@ -1,0 +1,2 @@
+one=com.cobostack.spi.demo.DemoServiceOneImpl
+two=com.cobostack.spi.demo.DemoServiceTwoImpl

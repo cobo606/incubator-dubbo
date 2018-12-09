@@ -58,6 +58,8 @@ public @interface SPI {
 
     /**
      * default extension name
+     *
+     * <p> 默认的扩展点 名称.
      */
     String value() default "";
 

@@ -25,7 +25,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Provide helpful information for {@link ExtensionLoader} to inject dependency extension instance.
+ * <p> 在 {@link ExtensionLoader} 生成Extension的Adaptive Instance时, 为 {@link ExtensionLoader#createAdaptiveExtensionClassCode()}
+ * 提供信息. 也就是 注解的方法, 需要被适配. {@link com.alibaba.dubbo.rpc.Protocol#export}
  *
  * @see ExtensionLoader
  * @see URL
