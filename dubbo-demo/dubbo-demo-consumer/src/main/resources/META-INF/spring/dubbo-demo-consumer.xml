@@ -28,8 +28,11 @@
     <!-- use multicast registry center to discover service -->
     <dubbo:registry address="zookeeper://192.168.38.81:2181" file="D:/dubbo-demo-cache"/>
 
-    <!-- generate proxy for the remote service, then demoService can be used in the same way as the
-    local regular interface -->
+    <!-- generate proxy for the remote service, then demoService can be used in the same way as the local regular interface -->
+    <!-- check: 启动时检查引用服务
+        true 没有找到服务直接退出: com.alibaba.dubbo.rpc.RpcException: No provider available from registry
+        false 抛出异常, 不影响服务正常运行
+        -->
     <dubbo:reference id="demoService" check="false" interface="com.alibaba.dubbo.demo.DemoService"/>
 
 </beans>

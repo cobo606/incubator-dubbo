@@ -34,6 +34,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
@@ -48,7 +49,14 @@ import java.util.Map;
 /**
  * ServiceFactoryBean
  *
- * @export
+ * <p> Dubbo 服务导出, 过程始于 Spring 容器发布刷新事件 {@link ApplicationListener#onApplicationEvent(ApplicationEvent)},
+ *  Dubbo 在接收到事件后, 会立即执行服务导出逻辑.
+ * <ol>
+ *     服务导出 {@link ServiceConfig#export()} 的主要步骤:
+ * <li> 前置工作, 主要用于检查参数, 组装 URL
+ * <li> 导出服务, 包含导出服务到本地 (JVM), 和导出服务到远程两个过程
+ * <li> 向注册中心注册服务, 用于服务发现.
+ * </ol>
  */
 public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean, DisposableBean,
         ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, BeanNameAware,
@@ -124,20 +132,27 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
+        // 是否延迟导出 && 是否已导出 && 是不是已被取消导出
         if (isDelay() && !isExported() && !isUnexported()) {
             if (logger.isInfoEnabled()) {
                 logger.info("The service ready on spring started. service: " + getInterface());
             }
+            // 导出服务
             export();
         }
     }
 
+    /** false 需要延迟导出, true 表示立即导出 */
     private boolean isDelay() {
+        // 获取延时配置
         Integer delay = getDelay();
         ProviderConfig provider = getProvider();
         if (delay == null && provider != null) {
+            // service.delay 优先级 > provider.delay
             delay = provider.getDelay();
         }
+
+        //  delay 为空, 或等于 -1 立即导出.
         return supportedApplicationListener && (delay == null || delay == -1);
     }
 
@@ -289,7 +304,7 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
     @Override
     public void export() {
         super.export();
-        // Publish ServiceBeanExportedEvent
+        // 发布 ServiceBeanExportedEvent 事件
         publishExportEvent();
     }
 

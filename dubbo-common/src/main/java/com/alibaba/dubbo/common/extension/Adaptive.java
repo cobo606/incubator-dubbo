@@ -25,6 +25,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * <p> Adaptive 可注解在类或方法上. 注解在类上时, Dubbo 不会为该类生成代理类. 注解在方法(接口方法)上时,
+ *  Dubbo 会为为该方法生成代理逻辑(由框架自动生成).
+ *
  * <p> 在 {@link ExtensionLoader} 生成Extension的Adaptive Instance时, 为 {@link ExtensionLoader#createAdaptiveExtensionClassCode()}
  * 提供信息. 也就是 注解的方法, 需要被适配. {@link com.alibaba.dubbo.rpc.Protocol#export}
  *

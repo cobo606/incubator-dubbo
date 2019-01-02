@@ -838,6 +838,7 @@ public class ExtensionLoader<T> {
         getExtensionClasses();
 
         // 是否缓存中已存在, getExtensionClasses() 可能会对该值进行设置.
+        // 自定义扩展点例子: AdaptiveCompiler, AdaptiveExtensionFactory
         if (cachedAdaptiveClass != null) {
             return cachedAdaptiveClass;
         }
@@ -869,34 +870,46 @@ public class ExtensionLoader<T> {
     /** 创建 适配器扩展点的 java代码 */
     private String createAdaptiveExtensionClassCode() {
         StringBuilder codeBuilder = new StringBuilder();
+        // 扩展点的所有方法
         Method[] methods = type.getMethods();
         boolean hasAdaptiveAnnotation = false;
         for (Method m : methods) {
+            // 检查方法是否存在 @Adaptive 注解.
             if (m.isAnnotationPresent(Adaptive.class)) {
                 hasAdaptiveAnnotation = true;
                 break;
             }
         }
+
+        // 所有方法不存在 @Adaptive 注解, 抛出异常.
         // no need to generate adaptive class since there's no adaptive method found.
         if (!hasAdaptiveAnnotation)
             throw new IllegalStateException("No adaptive method on extension " + type.getName() + ", refuse to create the adaptive class!");
 
+        // 生成 package 代码: package + type 所在包
         codeBuilder.append("package ").append(type.getPackage().getName()).append(";");
+        // 生成 import 代码: import + ExtensionLoader 全限定名
         codeBuilder.append("\nimport ").append(ExtensionLoader.class.getName()).append(";");
+        // 生成类代码：public class + type简单名称 + $Adaptive + implements + type全限定名
         codeBuilder.append("\npublic class ").append(type.getSimpleName()).append("$Adaptive").append(" implements ").append(type.getCanonicalName()).append(" {");
 
         for (Method method : methods) {
+            // 返回值类型
             Class<?> rt = method.getReturnType();
+            // 方法参数类型数组
             Class<?>[] pts = method.getParameterTypes();
+            // 抛出异常类型
             Class<?>[] ets = method.getExceptionTypes();
 
             Adaptive adaptiveAnnotation = method.getAnnotation(Adaptive.class);
             StringBuilder code = new StringBuilder(512);
+            // 方法上不存在 @Adaptive 注解, 则只会抛出异常: throw new UnsupportedOperationException(xx)
             if (adaptiveAnnotation == null) {
                 code.append("throw new UnsupportedOperationException(\"method ")
                         .append(method.toString()).append(" of interface ")
                         .append(type.getName()).append(" is not adaptive method!\");");
             } else {
+                // 遍历参数列表, 确定 URL 参数位置
                 int urlTypeIndex = -1;
                 for (int i = 0; i < pts.length; ++i) {
                     if (pts[i].equals(URL.class)) {
@@ -904,26 +917,36 @@ public class ExtensionLoader<T> {
                         break;
                     }
                 }
-                // found parameter in URL type
+
+                // 有类型为URL的参数
                 if (urlTypeIndex != -1) {
-                    // Null Point check
+                    // 为 URL 类型参数生成判空代码, 格式如下:
+                    // if (arg + urlTypeIndex == null)
+                    //     throw new IllegalArgumentException("url == null");
                     String s = String.format("\nif (arg%d == null) throw new IllegalArgumentException(\"url == null\");",
                             urlTypeIndex);
                     code.append(s);
 
+                    // 为 URL 类型参数生成赋值代码, 即 URL url = arg1
                     s = String.format("\n%s url = arg%d;", URL.class.getName(), urlTypeIndex);
                     code.append(s);
                 }
-                // did not find parameter in URL type
+                // 参数没有URL类型
                 else {
                     String attribMethod = null;
 
-                    // find URL getter method
+                    // 遍历方法列表, 寻找可返回 URL 的 getter 方法
                     LBL_PTS:
                     for (int i = 0; i < pts.length; ++i) {
+                        // 获取某一类型参数的全部方法
                         Method[] ms = pts[i].getMethods();
                         for (Method m : ms) {
                             String name = m.getName();
+                            // 1. 方法名以 get 开头，或方法名大于3个字符
+                            // 2. 方法的访问权限为 public
+                            // 3. 方法非静态类型
+                            // 4. 方法参数数量为0
+                            // 5. 方法返回值类型为 URL
                             if ((name.startsWith("get") || name.length() > 3)
                                     && Modifier.isPublic(m.getModifiers())
                                     && !Modifier.isStatic(m.getModifiers())
@@ -935,6 +958,7 @@ public class ExtensionLoader<T> {
                             }
                         }
                     }
+                    // 如果所有参数中均不包含可返回 URL 的 getter 方法, 则抛出异常
                     if (attribMethod == null) {
                         throw new IllegalStateException("fail to create adaptive class for interface " + type.getName()
                                 + ": not found url parameter or url attribute in parameters of method " + method.getName());
