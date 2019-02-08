@@ -133,12 +133,12 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         failedRegistered.remove(url);
         failedUnregistered.remove(url);
         try {
-            // Sending a registration request to the server side
+            // 模板方法, 由子类实现. ZookeeperRegistry#doRegister
             doRegister(url);
         } catch (Exception e) {
             Throwable t = e;
 
-            // If the startup detection is opened, the Exception is thrown directly.
+            // 如果开启了启动时检测, 则直接抛出异常, 否则报错.
             boolean check = getUrl().getParameter(Constants.CHECK_KEY, true)
                     && url.getParameter(Constants.CHECK_KEY, true)
                     && !Constants.CONSUMER_PROTOCOL.equals(url.getProtocol());
@@ -152,7 +152,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
                 logger.error("Failed to register " + url + ", waiting for retry, cause: " + t.getMessage(), t);
             }
 
-            // Record a failed registration request to a failed list, retry regularly
+            // 将失败的注册请求记录到失败列表, 定时重试
             failedRegistered.add(url);
         }
     }

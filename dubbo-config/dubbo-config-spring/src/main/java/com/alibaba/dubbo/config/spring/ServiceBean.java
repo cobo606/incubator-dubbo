@@ -130,6 +130,7 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
         return service;
     }
 
+    /** Spring 容器完成refresh后触发事件 {@link AbstractApplicationContext#finishRefresh()} */
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         // 是否延迟导出 && 是否已导出 && 是不是已被取消导出
@@ -156,6 +157,7 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
         return supportedApplicationListener && (delay == null || delay == -1);
     }
 
+    /** 完善属性的设置初始化 */
     @Override
     @SuppressWarnings({"unchecked", "deprecation"})
     public void afterPropertiesSet() throws Exception {

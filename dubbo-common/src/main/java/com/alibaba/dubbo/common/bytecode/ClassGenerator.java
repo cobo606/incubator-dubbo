@@ -45,6 +45,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * ClassGenerator
+ *
+ * 类字节码生成工具.
  */
 public final class ClassGenerator {
     private static final AtomicLong CLASS_NAME_COUNTER = new AtomicLong(0);
@@ -255,6 +257,7 @@ public final class ClassGenerator {
         return toClass(ClassHelper.getClassLoader(ClassGenerator.class), getClass().getProtectionDomain());
     }
 
+    /** 生成类字节码文件 */
     public Class<?> toClass(ClassLoader loader, ProtectionDomain pd) {
         if (mCtc != null)
             mCtc.detach();

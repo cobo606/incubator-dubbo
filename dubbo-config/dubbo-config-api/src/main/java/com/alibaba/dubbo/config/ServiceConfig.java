@@ -289,7 +289,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
-            // 对 interfaceClass，以及 <dubbo:method> 必要字段进行检查
+            // 对 interfaceClass, 以及 <dubbo:method> 必要字段进行检查
             checkInterfaceAndMethods(interfaceClass, methods);
             // 检测 ref 合法性
             checkRef();
@@ -326,7 +326,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             }
         }
 
-        // 检测各种对象是否为空，为空则新建，或者抛出异常
+        // 检测各种对象是否为空, 为空则新建, 或者抛出异常
         checkApplication();
         checkRegistry();
         checkProtocol();
@@ -379,7 +379,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
 
     /**
      * <p> Dubbo 允许我们使用不同的协议导出服务, 也允许我们向多个注册中心注册服务.
-     *  Dubbo 在 doExportUrls 方法中对多协议, 多注册中心进行了支持。
+     *  Dubbo 在 doExportUrls 方法中对多协议, 多注册中心进行了支持.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls() {
@@ -426,7 +426,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             for (MethodConfig method : methods) {
                 // 添加 MethodConfig 对象的字段信息到 map 中, key = 方法名.属性名.
                 // 比如存储 <dubbo:method name="sayHello" retries="2"> 对应的 MethodConfig,
-                // key = sayHello.retries，map = {"sayHello.retries": 2}
+                // key = sayHello.retries, map = {"sayHello.retries": 2}
                 appendParameters(map, method, method.getName());
 
                 // 处理 retry 属性
@@ -548,7 +548,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         String host = this.findConfigedHosts(protocolConfig, registryURLs, map);
         Integer port = this.findConfigedPorts(protocolConfig, name, map);
 
-        // 组装 URL
+        // 组装 URL dubbo://192.168.38.1:20880/com.alibaba.dubbo.demo.DemoService?anyhost=true&application=demo-provider&bean.name=com.alibaba.dubbo.demo.DemoService&bind.ip=192.168.38.1&bind.port=20880&dubbo=2.0.2&generic=false&interface=com.alibaba.dubbo.demo.DemoService&methods=sayHello&pid=16344&qos.port=22222&side=provider&threads=10&timestamp=1549381131652
         URL url = new URL(name, host, port, (contextPath == null || contextPath.length() == 0 ? "" : contextPath + "/") + path, map);
 
          // ==================== 服务导出(injvm, remote)
@@ -596,7 +596,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         // DelegateProviderMetaDataInvoker 仅用于持有 Invoker 和 ServiceConfig
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
 
-                        // 导出服务, 并生成 Exporter
+                        // 导出服务, 并生成 Exporter   实际调用方法: RegistryProtocol#export
                         Exporter<?> exporter = protocol.export(wrapperInvoker);
                         exporters.add(exporter);
                     }
@@ -613,14 +613,19 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         this.urls.add(url);
     }
 
+    /** 导出服务到本地, 进行服务导出之前, 需要先创建 Invoker. */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void exportLocal(URL url) {
+        // 如果 URL 的协议头等于 injvm, 说明已经导出到本地了, 无需再次导出
         if (!Constants.LOCAL_PROTOCOL.equalsIgnoreCase(url.getProtocol())) {
+            // 设置协议injvm: injvm://127.0.0.1:0
             URL local = URL.valueOf(url.toFullString())
                     .setProtocol(Constants.LOCAL_PROTOCOL)
                     .setHost(LOCALHOST)
                     .setPort(0);
             ServiceClassHolder.getInstance().pushServiceClass(getServiceClass(ref));
+
+            // 创建 Invoker, 并导出服务, 这里的 protocol 会在运行时调用 InjvmProtocol#export 方法.
             Exporter<?> exporter = protocol.export(
                     proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
             exporters.add(exporter);

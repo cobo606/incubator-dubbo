@@ -621,7 +621,7 @@ public class ExtensionLoader<T> {
 
     /**
      * 加载 所有扩展点实现类, 从多个目录. 主要逻辑:
-     * 1. 获得当前扩展点的注解, 也就是Protocol.class 这个类的注解，@SPI("dubbo")
+     * 1. 获得当前扩展点的注解, 也就是Protocol.class 这个类的注解, @SPI("dubbo")
      * 2. 获取 @SPI 中的 value值.
      * 3. 如果value有值, 就将value值, 赋给 {@link #cachedDefaultName} 用户获取默认的扩展点.
      * 4. 最后通过 loadDirectory 去加载指定路径下的所有扩展点.
@@ -755,7 +755,7 @@ public class ExtensionLoader<T> {
         } else {
             // clazz 是一个普通的拓展类.
 
-            // 检测 clazz 是否有默认的构造方法，如果没有，则抛出异常
+            // 检测 clazz 是否有默认的构造方法, 如果没有, 则抛出异常
             clazz.getConstructor();
             if (name == null || name.length() == 0) {
                 // 如果 name 为空, 则尝试从 Extension 注解获取 name, 或使用小写的类名作为 name.
@@ -942,7 +942,7 @@ public class ExtensionLoader<T> {
                         Method[] ms = pts[i].getMethods();
                         for (Method m : ms) {
                             String name = m.getName();
-                            // 1. 方法名以 get 开头，或方法名大于3个字符
+                            // 1. 方法名以 get 开头, 或方法名大于3个字符
                             // 2. 方法的访问权限为 public
                             // 3. 方法非静态类型
                             // 4. 方法参数数量为0

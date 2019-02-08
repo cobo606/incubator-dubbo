@@ -21,7 +21,6 @@ import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.remoting.zookeeper.ChildListener;
 import com.alibaba.dubbo.remoting.zookeeper.StateListener;
 import com.alibaba.dubbo.remoting.zookeeper.support.AbstractZookeeperClient;
-
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
@@ -43,6 +42,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
     public CuratorZookeeperClient(URL url) {
         super(url);
         try {
+            // 创建 CuratorFramework 构造器
             CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder()
                     .connectString(url.getBackupAddress())
                     .retryPolicy(new RetryNTimes(1, 1000))
@@ -51,7 +51,11 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
             if (authority != null && authority.length() > 0) {
                 builder = builder.authorization("digest", authority.getBytes());
             }
+
+            // 构建 CuratorFramework 实例
             client = builder.build();
+
+            // 添加监听器
             client.getConnectionStateListenable().addListener(new ConnectionStateListener() {
                 @Override
                 public void stateChanged(CuratorFramework client, ConnectionState state) {
@@ -64,6 +68,8 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
                     }
                 }
             });
+
+            // 启动客户端
             client.start();
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
