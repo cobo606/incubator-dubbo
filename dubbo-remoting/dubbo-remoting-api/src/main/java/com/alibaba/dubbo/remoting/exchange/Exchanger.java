@@ -33,7 +33,7 @@ import com.alibaba.dubbo.remoting.exchange.support.header.HeaderExchanger;
 public interface Exchanger {
 
     /**
-     * bind.
+     * bind. 服务端 bind.
      *
      * @param url
      * @param handler
@@ -43,7 +43,7 @@ public interface Exchanger {
     ExchangeServer bind(URL url, ExchangeHandler handler) throws RemotingException;
 
     /**
-     * connect.
+     * connect. 客户端 connect.
      *
      * @param url
      * @param handler

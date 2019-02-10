@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 
 /**
  * InvokerHandler
+ *
+ * <p> InvokerInvocationHandler 实现自 JDK 的 InvocationHandler 接口, 具体的用途是拦截接口类调用.
  */
 public class InvokerInvocationHandler implements InvocationHandler {
 

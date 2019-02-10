@@ -24,10 +24,16 @@ import com.alibaba.dubbo.remoting.ChannelHandler;
 import com.alibaba.dubbo.remoting.RemotingException;
 import com.alibaba.dubbo.remoting.exchange.support.ExchangeHandlerDispatcher;
 import com.alibaba.dubbo.remoting.exchange.support.Replier;
+import com.alibaba.dubbo.remoting.exchange.support.header.HeaderExchanger;
 import com.alibaba.dubbo.remoting.transport.ChannelHandlerAdapter;
 
 /**
  * Exchanger facade. (API, Static, ThreadSafe)
+ *
+ * <p> Exchanger 门面工具类, 用于创建出Exchanger.
+ * @see Exchanger
+ * @see ExchangeClient
+ * @see ExchangeServer
  */
 public class Exchangers {
 
@@ -109,9 +115,11 @@ public class Exchangers {
             throw new IllegalArgumentException("handler == null");
         }
         url = url.addParameterIfAbsent(Constants.CODEC_KEY, "exchange");
+        // 获取 Exchanger 实例, 默认为 HeaderExchangeClient.
         return getExchanger(url).connect(url, handler);
     }
 
+    /** 根据url中指定的exchanger来获取 Exchanger, 默认为 {@link HeaderExchanger} */
     public static Exchanger getExchanger(URL url) {
         String type = url.getParameter(Constants.EXCHANGER_KEY, Constants.DEFAULT_EXCHANGER);
         return getExchanger(type);

@@ -24,6 +24,12 @@ import com.alibaba.dubbo.remoting.transport.ChannelHandlerDispatcher;
 
 /**
  * Transporter facade. (API, Static, ThreadSafe)
+ *
+ * <p> Transporter 门面工具类, 用于获得 {@link Client} 和 {@link Server}
+ * 客户端和服务端的网络传输对象, 实际底层实现 为 NettyTransporter.
+ *
+ * @see Transporter
+ * @see NettyTransporter
  */
 public class Transporters {
 
