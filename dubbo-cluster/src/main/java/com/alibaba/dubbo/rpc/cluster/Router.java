@@ -28,6 +28,11 @@ import java.util.List;
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Routing">Routing</a>
  *
+ * <p> 集群容错之服务路由介绍: 服务路由包含一条路由规则, 路由规则决定了服务消费者的调用目标, 即规定了服务消费者可调用哪些服务提供者.
+ * Dubbo 目前提供了三种服务路由实现, 分别为条件路由 ConditionRouter、脚本路由 ScriptRouter 和标签路由 TagRouter.
+ * 其中条件路由是我们最常使用的.
+ * <a href="http://dubbo.apache.org/zh-cn/docs/user/demos/routing-rule.html">路由规则</a>
+ *
  * @see com.alibaba.dubbo.rpc.cluster.Cluster#join(Directory)
  * @see com.alibaba.dubbo.rpc.cluster.Directory#list(Invocation)
  */
