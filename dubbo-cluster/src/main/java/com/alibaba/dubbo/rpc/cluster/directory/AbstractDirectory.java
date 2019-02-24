@@ -36,6 +36,8 @@ import java.util.List;
 /**
  * Abstract implementation of Directory: Invoker list returned from this Directory's list method have been filtered by Routers
  *
+ * <p> 服务目录目前内置的实现有两个, 分别为 StaticDirectory 和 RegistryDirectory, 它们均是 AbstractDirectory 的子类.
+ * AbstractDirectory 实现了 Directory 接口, 这个接口包含了一个重要的方法定义, 即 list(Invocation), 用于列举 Invoker.
  */
 public abstract class AbstractDirectory<T> implements Directory<T> {
 
@@ -66,17 +68,25 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         setRouters(routers);
     }
 
+    /** AbstractDirectory 封装了 Invoker 列举流程, 具体的列举逻辑则由子类实现, 这是典型的模板模式. {@link AbstractDirectory#doList(Invocation)} */
     @Override
     public List<Invoker<T>> list(Invocation invocation) throws RpcException {
         if (destroyed) {
             throw new RpcException("Directory already destroyed .url: " + getUrl());
         }
+
+        // 调用 doList 方法列举 Invoker, 这里的 doList 是模板方法, 由子类实现.
         List<Invoker<T>> invokers = doList(invocation);
+
+        // 获取路由器
         List<Router> localRouters = this.routers; // local reference
         if (localRouters != null && !localRouters.isEmpty()) {
             for (Router router : localRouters) {
                 try {
+                    // 获取 runtime 参数, 这个参数决定了是否在每次调用服务时都执行路由规则.
+                    // 如果 runtime 为 true, 那么每次调用服务前, 都需要进行服务路由.
                     if (router.getUrl() == null || router.getUrl().getParameter(Constants.RUNTIME_KEY, false)) {
+                        // 进行服务路由
                         invokers = router.route(invokers, getConsumerUrl(), invocation);
                     }
                 } catch (Throwable t) {
@@ -128,6 +138,7 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         destroyed = true;
     }
 
+    /** 模板方法, 由子类实现 */
     protected abstract List<Invoker<T>> doList(Invocation invocation) throws RpcException;
 
 }

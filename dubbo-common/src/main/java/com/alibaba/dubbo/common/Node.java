@@ -24,6 +24,8 @@ public interface Node {
     /**
      * get url.
      *
+     * <p> 获取配置信息的方法 getUrl, 实现该接口的类可以向外提供配置信息.
+     *
      * @return url.
      */
     URL getUrl();
